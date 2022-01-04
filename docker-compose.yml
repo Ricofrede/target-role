@@ -1,0 +1,47 @@
+version: '3.7'
+services:
+  db-tr:
+    env_file:
+      - .env
+    container_name: db-tr
+    restart: always
+    image: postgres:14.1-alpine
+    volumes:
+      - db-tr-vol:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    ports:
+      - 5432:5432
+    networks:
+      - net-tr
+
+  back-tr:
+    env_file:
+      - .env
+    container_name: back-tr
+    restart: always
+    build:
+      context: ./back-tr
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_SSL=${DATABASE_SSL}
+    volumes:
+      - ./back-tr:/app
+    depends_on:
+      - db-tr
+    ports:
+      - 1337:1337
+    networks:
+      - net-tr
+
+networks:
+  net-tr:
+
+volumes:
+  db-tr-vol:
